@@ -95,56 +95,61 @@ function PersonResult({ person, onReset }) {
   const team = SCHOOL_TEAMS[person.schoolTeam]
   const crossDates = CAMPAIGN_DATES[person.crossDay]
   const schoolDates = team.days.flatMap((day) => CAMPAIGN_DATES[day]).sort((a, b) => Number(a.split('. ')[1]) - Number(b.split('. ')[1]))
-  const passNumber = String(PEOPLE.findIndex(({ id }) => id === person.id) + 1).padStart(3, '0')
 
   return (
     <section className="result-card" aria-live="polite">
-      <div className="ticket-topbar">
-        <div className="ticket-logo"><strong>ARENA</strong> <span>CREW</span></div>
-        <div className="pass-number">PASS NO. <strong>{passNumber}</strong></div>
+      <div className="result-toolbar">
+        <div className="workspace-title"><span></span><strong>Promotion workspace</strong><small>Schedule assigned</small></div>
         <button className="reset-button" type="button" onClick={onReset} aria-label="검색 결과 닫기"><Icon name="x" size={17} /></button>
       </div>
 
-      <div className="ticket-body">
-        <div className="result-heading">
-          <div className="avatar">{person.displayName.slice(0, 1)}</div>
-          <div>
-            <p className="eyebrow">PASSENGER · SUPPORTERS</p>
-            <h3>{person.displayName}</h3>
-            <p className="identity">홍보 담당{person.suffix ? ` · ${person.school} · ${person.suffix}` : ''}</p>
-          </div>
+      <div className="result-profile">
+        <div className="avatar">{person.displayName.slice(0, 1)}</div>
+        <div>
+          <p className="eyebrow">SUPPORTER PROFILE</p>
+          <h3>{person.displayName}</h3>
+          <p className="identity">홍보 담당{person.suffix ? ` · ${person.school} · ${person.suffix}` : ''}</p>
         </div>
-
-        <div className="assignment-grid">
-          <article className="assignment cross-assignment">
-            <div className="assignment-stamp">CROSS<br />CAMPUS</div>
-            <div className="assignment-copy">
-              <p>타 학교 커뮤니티에 게시 · 주 1회</p>
-              <h4><strong>{person.crossDay}</strong><small>{DAY_EN[person.crossDay]}</small></h4>
-              <div className="date-row">
-                <span>BOARDING DATES</span>
-                <div>{crossDates.map((date) => <b key={date}>9월 {date.split('. ')[1]}일</b>)}</div>
-              </div>
-            </div>
-          </article>
-
-          <article className="assignment school-assignment">
-            <div className="assignment-stamp">EVERY<br />TIME</div>
-            <div className="assignment-copy">
-              <p>본인 소속 학교 에브리타임에 게시 · {person.schoolTeam}팀</p>
-              <h4><strong>{team.days.join(' · ')}</strong><small>{team.days.map((day) => DAY_EN[day]).join(' / ')}</small></h4>
-              <div className="date-row">
-                <span>BOARDING DATES</span>
-                <div>{schoolDates.map((date) => <b key={date}>9월 {date.split('. ')[1]}일</b>)}</div>
-              </div>
-            </div>
-          </article>
-        </div>
+        <span className="assigned-badge"><i></i> 배정 완료</span>
       </div>
 
-      <div className="ticket-stub">
-        <div><span>FOCUS PERIOD</span><strong>9.1(화)—9.11(금)</strong><small>행사 직전 참가 신청 독려 집중 노출</small></div>
-        <div className="barcode" aria-hidden="true"></div>
+      <div className="schedule-grid">
+        <article className="schedule-module cross-assignment">
+          <div className="module-header">
+            <span><Icon name="globe" size={17} /></span>
+            <strong>Cross-Campus</strong>
+            <small>주 1회</small>
+          </div>
+          <div className="module-day"><strong>{person.crossDay}</strong><span>{DAY_EN[person.crossDay]}</span></div>
+          <p>타 학교 커뮤니티에 게시</p>
+          <div className="date-row">
+            <span>집중 홍보 기간 게시일</span>
+            <div>{crossDates.map((date) => <b key={date}>9월 {date.split('. ')[1]}일</b>)}</div>
+          </div>
+        </article>
+
+        <article className="schedule-module school-assignment">
+          <div className="module-header">
+            <span><Icon name="school" size={17} /></span>
+            <strong>자교 에브리타임</strong>
+            <small>{person.schoolTeam}팀 · 주 2회</small>
+          </div>
+          <div className="module-day"><strong>{team.days.join(' · ')}</strong><span>{team.days.map((day) => DAY_EN[day]).join(' / ')}</span></div>
+          <p>본인 소속 학교 에브리타임에 게시</p>
+          <div className="date-row">
+            <span>집중 홍보 기간 게시일</span>
+            <div>{schoolDates.map((date) => <b key={date}>9월 {date.split('. ')[1]}일</b>)}</div>
+          </div>
+        </article>
+      </div>
+
+      <div className="campaign-progress">
+        <div>
+          <span>FOCUS PERIOD</span>
+          <strong>9월 1일(화) — 9월 11일(금)</strong>
+        </div>
+        <div className="progress-track" aria-hidden="true"><i></i></div>
+        <small>행사 직전 참가 신청 독려 집중 노출</small>
       </div>
     </section>
   )
@@ -191,6 +196,66 @@ function App() {
       </header>
 
       <div className="page-shell" id="top">
+        <section className="finder-section">
+          <div className="finder-copy">
+            <p className="section-number">01 · FIND MY SCHEDULE</p>
+            <h2><span>내 이름으로</span><span>일정을 찾아보세요.</span></h2>
+            <p>이름을 검색하면 게시해야 할 채널과 요일을 바로 확인할 수 있어요.</p>
+          </div>
+
+          <div className="finder-panel">
+            <div className="scan-label">NAME SCAN</div>
+            <form className={`search-box ${query && !selectedPerson ? 'is-active' : ''}`} onSubmit={handleSubmit}>
+              <Icon name="search" size={23} />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(event) => { setQuery(event.target.value); setSelectedId(null) }}
+                placeholder="이름을 입력해 주세요"
+                aria-label="서포터즈 이름 검색"
+                autoComplete="off"
+              />
+              {query && <button type="button" className="clear-button" onClick={resetSearch} aria-label="검색어 지우기"><Icon name="x" size={17} /></button>}
+              <button className="search-button" type="submit" aria-label="검색"><span>검색</span><Icon name="arrow" size={18} /></button>
+            </form>
+
+            {!query && !selectedPerson && (
+              <>
+                <div className="search-hint"><Icon name="users" size={17} /><span>62명의 최종 배정 명단에서 검색합니다.</span></div>
+                <div className="workspace-preview" aria-hidden="true">
+                  <div className="preview-topline"><span><i></i> Assignment system</span><small>LIVE</small></div>
+                  <div className="preview-grid">
+                    <div><span>SUPPORTERS</span><strong>62</strong><small>전원 최종 배정</small></div>
+                    <div><span>CROSS-CAMPUS</span><strong>1×</strong><small>주 1회 게시</small></div>
+                    <div><span>EVERYTIME</span><strong>2×</strong><small>주 2회 게시</small></div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {query && !selectedPerson && (
+              <div className="match-list" role="listbox" aria-label="검색 결과">
+                {matches.length > 0 ? matches.map((person) => (
+                  <button key={person.id} type="button" onClick={() => selectPerson(person)}>
+                    <span className="mini-avatar">{person.displayName[0]}</span>
+                    <span className="match-identity">
+                      <strong>{person.displayName}{person.suffix && ` (${person.suffix})`}</strong>
+                      <small>{person.school ?? `Cross-Campus ${person.crossDay} · 자교 ${person.schoolTeam}팀`}</small>
+                    </span>
+                    <Icon name="chevron" size={18} />
+                  </button>
+                )) : (
+                  <div className="no-result">
+                    <span>“{query}”</span>와 일치하는 이름이 없습니다.<small>띄어쓰기와 이름을 다시 확인해 주세요.</small>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedPerson && <PersonResult person={selectedPerson} onReset={resetSearch} />}
+          </div>
+        </section>
+
         <section className="intro">
           <div className="intro-copy">
             <p className="kicker"><span></span> ARENA CREW · 서포터즈 홍보 스케줄</p>
@@ -218,56 +283,6 @@ function App() {
           <div><span className="legend-dot blue"></span>Cross-Campus 홍보 <strong>주 1회</strong><small>(12~13명/일)</small></div>
           <div><span className="legend-dot orange"></span>자교 에브리타임 홍보 <strong>주 2회</strong><small>(1팀 31명 / 2팀 31명, 학교별 교대)</small></div>
         </div>
-
-        <section className="finder-section">
-          <div className="finder-copy">
-            <p className="section-number">01 · FIND MY SCHEDULE</p>
-            <h2>내 이름으로<br />일정을 찾아보세요.</h2>
-            <p>이름을 검색하면 게시해야 할 채널과 요일을 바로 확인할 수 있어요.</p>
-          </div>
-
-          <div className="finder-panel">
-            <div className="scan-label">NAME SCAN</div>
-            <form className={`search-box ${query && !selectedPerson ? 'is-active' : ''}`} onSubmit={handleSubmit}>
-              <Icon name="search" size={23} />
-              <input
-                ref={inputRef}
-                value={query}
-                onChange={(event) => { setQuery(event.target.value); setSelectedId(null) }}
-                placeholder="이름을 입력해 주세요"
-                aria-label="서포터즈 이름 검색"
-                autoComplete="off"
-              />
-              {query && <button type="button" className="clear-button" onClick={resetSearch} aria-label="검색어 지우기"><Icon name="x" size={17} /></button>}
-              <button className="search-button" type="submit" aria-label="검색"><span>검색</span><Icon name="arrow" size={18} /></button>
-            </form>
-
-            {!query && !selectedPerson && (
-              <div className="search-hint"><Icon name="users" size={17} /><span>62명의 최종 배정 명단에서 검색합니다.</span></div>
-            )}
-
-            {query && !selectedPerson && (
-              <div className="match-list" role="listbox" aria-label="검색 결과">
-                {matches.length > 0 ? matches.map((person) => (
-                  <button key={person.id} type="button" onClick={() => selectPerson(person)}>
-                    <span className="mini-avatar">{person.displayName[0]}</span>
-                    <span className="match-identity">
-                      <strong>{person.displayName}{person.suffix && ` (${person.suffix})`}</strong>
-                      <small>{person.school ?? `Cross-Campus ${person.crossDay} · 자교 ${person.schoolTeam}팀`}</small>
-                    </span>
-                    <Icon name="chevron" size={18} />
-                  </button>
-                )) : (
-                  <div className="no-result">
-                    <span>“{query}”</span>와 일치하는 이름이 없습니다.<small>띄어쓰기와 이름을 다시 확인해 주세요.</small>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {selectedPerson && <PersonResult person={selectedPerson} onReset={resetSearch} />}
-          </div>
-        </section>
 
         <section className="weekly-section">
           <div className="section-heading">
